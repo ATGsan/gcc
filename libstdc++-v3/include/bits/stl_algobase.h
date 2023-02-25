@@ -1489,14 +1489,17 @@ _GLIBCXX_END_NAMESPACE_CONTAINER
       return __first;
     }
 
-// typename std::enable_if<std::is_arithmetic<_Tp>::value && (_Compare == std::greater || _Compare == std::less)>
   template<typename _ForwardIterator, typename _Tp, typename _Compare> 
   _GLIBCXX20_CONSTEXPR
-  typename std::enable_if<std::is_arithmetic<_Tp>::value &&
-           (std::is_same<_Compare, std::greater<_Tp>>::value ||
-            std::is_same<_Compare, std::less<_Tp>>::value), _ForwardIterator>::value 
-  __lower_bound(_ForwardIterator __first, _ForwardIterator __last,
-    const _Tp& __val, _Compare __comp)
+  typename std::enable_if<std::is_arithmetic<_Tp>::value && (
+#if __cplusplus >= 201402L
+           std::is_same<_Compare, std::greater<>>::value || 
+           std::is_same<_Compare, std::less<>>::value ||
+#endif
+           std::is_same<_Compare, std::greater<_Tp>>::value ||
+           std::is_same<_Compare, std::less<_Tp>>::value), _ForwardIterator>::type 
+  my_lower_bound_for(_ForwardIterator __first, _ForwardIterator __last,
+		           const _Tp& __val, _Compare __comp)
   {
     constexpr size_t DISTANCE = hardware_constructive_interference_size / sizeof(_Tp);
     typedef typename std::iterator_traits<_ForwardIterator>::difference_type _DistanceType;
