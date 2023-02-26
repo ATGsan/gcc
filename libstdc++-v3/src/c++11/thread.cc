@@ -154,6 +154,19 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
   }
 
   void
+  thread::set_priority(std::thread_priority priority) {
+    if(__gthread_objc_thread_set_priority(priority) == -1) {
+      // log error?
+    }
+  }
+
+  std::thread_priority
+  thread::get_priority() {
+    // catch error?
+    return __gthread_objc_thread_get_priority();
+  }
+
+  void
   thread::_M_start_thread(_State_ptr state, void (*)())
   {
     if (!__gthread_active_p())

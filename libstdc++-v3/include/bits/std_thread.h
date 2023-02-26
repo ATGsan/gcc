@@ -75,6 +75,18 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
    * @headerfile thread
    * @since C++11
    */
+
+  enum thread_priority {
+    idle = 1,
+    lowest = 2,
+    low = 3,
+    normal = 4,
+    high = 5,
+    highest = 6,
+    time_critical = 7,
+    inherit = 8
+  }
+
   class thread
   {
   public:
@@ -205,6 +217,13 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
     // Returns a value that hints at the number of hardware thread contexts.
     static unsigned int
     hardware_concurrency() noexcept;
+    
+    void
+    set_priority();
+    
+    std::thread_priority
+    get_priority() {
+    }
 
 #ifdef _GLIBCXX_HAS_GTHREADS
 #ifndef _GLIBCXX_THREAD_IMPL
