@@ -85,8 +85,8 @@
     using std::hardware_destructive_interference_size;
 #else
     // 64 bytes on x86-64 │ L1_CACHE_BYTES │ L1_CACHE_SHIFT │ __cacheline_aligned │ ...
-    constexpr std::size_t hardware_constructive_interference_size = 64;
-    constexpr std::size_t hardware_destructive_interference_size = 64;
+    _GLIBCXX20_CONSTEXPR std::size_t hardware_constructive_interference_size = 64;
+    _GLIBCXX20_CONSTEXPR std::size_t hardware_destructive_interference_size = 64;
 #endif
 
 namespace std _GLIBCXX_VISIBILITY(default)
@@ -1501,7 +1501,7 @@ _GLIBCXX_END_NAMESPACE_CONTAINER
   my_lower_bound_for(_ForwardIterator __first, _ForwardIterator __last,
 		           const _Tp& __val, _Compare __comp)
   {
-    constexpr size_t DISTANCE = hardware_constructive_interference_size / sizeof(_Tp);
+    _GLIBCXX20_CONSTEXPR size_t DISTANCE = hardware_constructive_interference_size / sizeof(_Tp);
     typedef typename std::iterator_traits<_ForwardIterator>::difference_type _DistanceType;
     _DistanceType __len = std::distance(__first, __last);
     while (__len > DISTANCE)
