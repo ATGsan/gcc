@@ -69,7 +69,6 @@
 #include <debug/debug.h>
 #include <bits/move.h> // For std::swap
 #include <bits/predefined_ops.h>
-#include <bits/stl_function.h>
 #if __cplusplus >= 201103L
 # include <type_traits>
 #endif
@@ -1484,33 +1483,18 @@ _GLIBCXX_END_NAMESPACE_CONTAINER
 
 #ifdef __cpp_lib_hardware_interference_size
 
-
-#ifndef _STL_FUNCTION_H
-
-#if __cplusplus < 201402L
 template<typename _Tp>
 struct less;
 
 template<typename _Tp>
 struct greater;
-#endif
-
-#if __cplusplus >= 201402L
-template<typename _Tp = void >
-struct less;
-
-template<typename _Tp = void >
-struct greater;
-#endif
-
-#endif
 
 template<typename _ForwardIterator, typename _Tp, typename _Compare> 
   _GLIBCXX20_CONSTEXPR
   typename std::enable_if<std::is_arithmetic<_Tp>::value && (
 #if __cplusplus >= 201402L
-           std::is_same<_Compare, std::greater<>>::value || 
-           std::is_same<_Compare, std::less<>>::value ||
+           std::is_same<_Compare, std::greater<void>>::value || 
+           std::is_same<_Compare, std::less<void>>::value ||
 #endif
            std::is_same<_Compare, std::greater<_Tp>>::value ||
            std::is_same<_Compare, std::less<_Tp>>::value), _ForwardIterator>::type 
