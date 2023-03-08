@@ -80,15 +80,6 @@
 # include <compare>
 #endif
 
-#ifdef __cpp_lib_hardware_interference_size
-    using std::hardware_constructive_interference_size;
-    using std::hardware_destructive_interference_size;
-#else
-    // 64 bytes on x86-64 │ L1_CACHE_BYTES │ L1_CACHE_SHIFT │ __cacheline_aligned │ ...
-    _GLIBCXX20_CONSTEXPR std::size_t hardware_constructive_interference_size = 64;
-    _GLIBCXX20_CONSTEXPR std::size_t hardware_destructive_interference_size = 64;
-#endif
-
 namespace std _GLIBCXX_VISIBILITY(default)
 {
 _GLIBCXX_BEGIN_NAMESPACE_VERSION
@@ -1489,7 +1480,32 @@ _GLIBCXX_END_NAMESPACE_CONTAINER
       return __first;
     }
 
-  template<typename _ForwardIterator, typename _Tp, typename _Compare> 
+
+
+#ifdef __cpp_lib_hardware_interference_size
+
+
+#ifndef _STL_FUNCTION_H
+
+#if __cplusplus < 201402L
+template<typename _Tp>
+struct less;
+
+template<typename _Tp>
+struct greater;
+#endif
+
+#if __cplusplus >= 201402L
+template<typename _Tp = void >
+struct less;
+
+template<typename _Tp = void >
+struct greater;
+#endif
+
+#endif
+
+template<typename _ForwardIterator, typename _Tp, typename _Compare> 
   _GLIBCXX20_CONSTEXPR
   typename std::enable_if<std::is_arithmetic<_Tp>::value && (
 #if __cplusplus >= 201402L
@@ -1498,13 +1514,13 @@ _GLIBCXX_END_NAMESPACE_CONTAINER
 #endif
            std::is_same<_Compare, std::greater<_Tp>>::value ||
            std::is_same<_Compare, std::less<_Tp>>::value), _ForwardIterator>::type 
-  my_lower_bound_for(_ForwardIterator __first, _ForwardIterator __last,
+  __lower_bound(_ForwardIterator __first, _ForwardIterator __last,
 		           const _Tp& __val, _Compare __comp)
   {
-    _GLIBCXX20_CONSTEXPR size_t DISTANCE = hardware_constructive_interference_size / sizeof(_Tp);
+    _GLIBCXX20_CONSTEXPR size_t __binsearch_distance = std::hardware_constructive_interference_size / sizeof(_Tp);
     typedef typename std::iterator_traits<_ForwardIterator>::difference_type _DistanceType;
     _DistanceType __len = std::distance(__first, __last);
-    while (__len > DISTANCE)
+    while (__len > __binsearch_distance)
     {
       _DistanceType __half = __len >> 1;
       _ForwardIterator __middle = __first;
@@ -1524,7 +1540,8 @@ _GLIBCXX_END_NAMESPACE_CONTAINER
     }
     return __last;
   }
-  
+#endif
+
   /**
    *  @brief Finds the first position in which @a val could be inserted
    *         without changing the ordering.
