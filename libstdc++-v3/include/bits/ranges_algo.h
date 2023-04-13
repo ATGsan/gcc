@@ -2077,10 +2077,8 @@ namespace ranges
 	     indirect_strict_weak_order<const _Tp*, projected<_Iter, _Proj>>
 	       _Comp = ranges::less>
       constexpr  typename std::enable_if<std::is_arithmetic<_Tp>::value && (
-#if __cplusplus >= 201402L
            std::is_same<_Compare, std::greater<void>>::value || 
            std::is_same<_Compare, std::less<void>>::value ||
-#endif
            std::is_same<_Compare, std::greater<_Tp>>::value ||
            std::is_same<_Compare, std::less<_Tp>>::value), _ForwardIterator>::type 
       operator()(_Iter __first, _Sent __last,
@@ -2102,7 +2100,12 @@ namespace ranges
 	    else
 	      __len = __half;
 	  }
-	return __first;
+	for (auto i = __first ; i != __last ; ++i) {
+        if (!__comp(*i, __val)) {
+            return i;
+        }
+    }
+    return __last;
       }
 
     template<forward_range _Range, typename _Tp, typename _Proj = identity,
