@@ -1786,8 +1786,8 @@ namespace ranges
 	  
     template<random_access_iterator _Iter, sentinel_for<_Iter> _Sent,
 	     typename _Comp = ranges::less, typename _Proj = identity>
-      requires sortable<_Iter, _Comp, _Proj>
-      constexpr typename std::__enable_if<std::is_same<_Proj, bool>, _Iter>::value
+      requires sortable<_Iter, _Comp, _Proj> && std::is_same<_Proj, bool>
+      constexpr _Iter
       operator()(_Iter __first, _Sent __last,
 		 _Comp __comp = {}, _Proj __proj = {}) const
       {
