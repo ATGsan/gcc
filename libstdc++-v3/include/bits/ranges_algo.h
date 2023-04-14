@@ -2076,11 +2076,12 @@ namespace ranges
 	     typename _Tp, typename _Proj = identity,
 	     indirect_strict_weak_order<const _Tp*, projected<_Iter, _Proj>>
 	       _Comp = ranges::less>
-      constexpr  typename std::enable_if<std::is_arithmetic<_Tp>::value && (
-           std::is_same<_Compare, std::greater<void>>::value || 
-           std::is_same<_Compare, std::less<void>>::value ||
-           std::is_same<_Compare, std::greater<_Tp>>::value ||
-           std::is_same<_Compare, std::less<_Tp>>::value), _ForwardIterator>::type 
+		requires std::is_arithmetic<_Tp>::value && (
+           		 std::is_same<_Compare, std::greater<void>>::value || 
+           		 std::is_same<_Compare, std::less<void>>::value ||
+           		 std::is_same<_Compare, std::greater<_Tp>>::value ||
+           		 std::is_same<_Compare, std::less<_Tp>>::value)
+      constexpr  _Iter
       operator()(_Iter __first, _Sent __last,
 		 const _Tp& __value, _Comp __comp = {}, _Proj __proj = {}) const
       {
