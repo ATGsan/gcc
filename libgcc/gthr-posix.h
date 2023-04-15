@@ -885,6 +885,77 @@ __gthread_cond_destroy (__gthread_cond_t* __cond)
   return __gthrw_(pthread_cond_destroy) (__cond);
 }
 
+enum thread_priority {
+  lowest = 0,
+  low = 1,
+  normal = 2,
+  high = 3,
+  highest = 4
+}
+
+static inline void 
+__gthread_set_priority(thread_priority priority) {
+  if (!__gthread_active_p ())
+    return;
+  else
+    {
+#ifdef _POSIX_PRIORITY_SCHEDULING
+#ifdef _POSIX_THREAD_PRIORITY_SCHEDULING
+      pthread_t thread_id = __gthrw_(pthread_self) ();
+      int policy;
+      struct sched_param params;
+      int priority_min, priority_max;
+
+      if (__gthrw_(pthread_getschedparam) (thread_id, &policy, &params) == 0)
+	{
+	  if ((priority_max = __gthrw_(sched_get_priority_max) (policy)) == -1)
+	    return;
+
+	  if ((priority_min = __gthrw_(sched_get_priority_min) (policy)) == -1)
+	    return;
+
+	  params.sched_priority = priority_min + (priority * (priority_min - priority_max) / thread_priority::highest);
+
+	  /*
+	   * The solaris 7 and several other man pages incorrectly state that
+	   * this should be a pointer to policy but pthread.h is universally
+	   * at odds with this.
+	   */
+	  if (__gthrw_(pthread_setschedparam) (thread_id, policy, &params) == 0)
+	    return;
+	}
+#endif /* _POSIX_THREAD_PRIORITY_SCHEDULING */
+#endif /* _POSIX_PRIORITY_SCHEDULING */
+      return -1;
+    }
+}
+
+static inline thread_priority
+__gthread_get_priority() {
+#ifdef _POSIX_PRIORITY_SCHEDULING
+#ifdef _POSIX_THREAD_PRIORITY_SCHEDULING
+  if (__gthread_active_p ())
+    {
+      int policy;
+      struct sched_param params;
+      if (__gthrw_(pthread_getschedparam) (__gthrw_(pthread_self) (), &policy, &params) == 0) {
+        int priority_min, priority_max;
+        if ((priority_max = __gthrw_(sched_get_priority_max) (policy)) == -1)
+          return thread_priority::normal;
+
+        if ((priority_min = __gthrw_(sched_get_priority_min) (policy)) == -1)
+          return thread_priority::normal;
+	      return (params.sched_priority - priority_min) * thread_priority::highest / (priority_max - priority_min);
+      }
+      else
+	return -1;
+    }
+  else
+#endif /* _POSIX_THREAD_PRIORITY_SCHEDULING */
+#endif /* _POSIX_PRIORITY_SCHEDULING */
+    return thread_priority::normal;
+}
+
 #endif /* _LIBOBJC */
 
 #endif /* ! GCC_GTHR_POSIX_H */

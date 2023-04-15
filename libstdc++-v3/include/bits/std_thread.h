@@ -77,14 +77,11 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
    */
 
   enum thread_priority {
-    idle = 1,
-    lowest = 2,
-    low = 3,
-    normal = 4,
-    high = 5,
-    highest = 6,
-    time_critical = 7,
-    inherit = 8
+    lowest = 0,
+    low = 1,
+    normal = 2,
+    high = 3,
+    highest = 4
   }
 
   class thread

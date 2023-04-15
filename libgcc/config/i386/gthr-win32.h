@@ -867,6 +867,71 @@ __gthread_cond_wait_recursive (__gthread_cond_t *__cond,
   return __gthread_cond_wait (__cond, __mutex);
 }
 
+enum thread_priority {
+  lowest = 0,
+  low = 1,
+  normal = 2,
+  high = 3,
+  highest = 4
+}
+
+static inline void 
+__gthread_set_priority(thread_priority priority) {
+  int sys_priority = 0;
+
+  switch (priority)
+    {
+    case lowest:
+      sys_priority = THREAD_PRIORITY_LOWEST;
+      break;
+    case low:
+      sys_priority = THREAD_PRIORITY_BELOW_NORMAL;
+      break;
+    case normal:
+      sys_priority = THREAD_PRIORITY_NORMAL;
+      break;
+    case high:
+      sys_priority = THREAD_PRIORITY_ABOVE_NORMAL;
+      break;
+    case highest:
+      sys_priority = THREAD_PRIORITY_HIGHEST;
+      break;
+    default:
+      sys_priority = THREAD_PRIORITY_NORMAL;
+    }
+
+  /* Change priority */
+  if (SetThreadPriority (GetCurrentThread (), sys_priority))
+    return 0;
+  else
+    return -1;
+}
+
+static inline thread_priority
+__gthread_get_priority() {
+  int sys_priority;
+
+  sys_priority = GetThreadPriority (GetCurrentThread ());
+
+  switch (sys_priority)
+    {
+    case THREAD_PRIORITY_IDLE:
+    case THREAD_PRIORITY_LOWEST:
+      return thread_priority::lowest;
+    case THREAD_PRIORITY_BELOW_NORMAL:
+      return thread_priority::low;
+    case THREAD_PRIORITY_NORMAL:
+      return thread_priority::normal;
+    case THREAD_PRIORITY_ABOVE_NORMAL:
+      return thread_priority::high;
+    case THREAD_PRIORITY_HIGHEST:
+    case THREAD_PRIORITY_TIME_CRITICAL:
+      return thread_priority::highest;
+    default:
+      return thread_priority::normal;
+    }   
+}
+
 #endif
 
 #ifdef __cplusplus
