@@ -2075,6 +2075,43 @@ namespace ranges
 	return __first;
       }
 
+	template<forward_iterator _Iter, sentinel_for<_Iter> _Sent,
+	     typename _Tp, typename _Proj = identity,
+	     indirect_strict_weak_order<const _Tp*, projected<_Iter, _Proj>>
+	       _Comp = ranges::less>
+		requires std::is_arithmetic<_Tp>::value && (
+           		 std::is_same<_Compare, std::greater<void>>::value || 
+           		 std::is_same<_Compare, std::less<void>>::value ||
+           		 std::is_same<_Compare, std::greater<_Tp>>::value ||
+           		 std::is_same<_Compare, std::less<_Tp>>::value)
+      constexpr  _Iter
+      operator()(_Iter __first, _Sent __last,
+		 const _Tp& __value, _Comp __comp = {}, _Proj __proj = {}) const
+      {
+	auto __len = ranges::distance(__first, __last);
+
+	while (__len > 0)
+	  {
+	    auto __half = __len / 2;
+	    auto __middle = __first;
+	    ranges::advance(__middle, __half);
+	    if (std::__invoke(__comp, std::__invoke(__proj, *__middle), __value))
+	      {
+		__first = __middle;
+		++__first;
+		__len = __len - __half - 1;
+	      }
+	    else
+	      __len = __half;
+	  }
+	for (auto i = __first ; i != __last ; ++i) {
+        if (!__comp(*i, __val)) {
+            return i;
+        }
+    }
+    return __last;
+      }
+
     template<forward_range _Range, typename _Tp, typename _Proj = identity,
 	     indirect_strict_weak_order<const _Tp*,
 					projected<iterator_t<_Range>, _Proj>>

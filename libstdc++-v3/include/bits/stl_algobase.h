@@ -1481,6 +1481,53 @@ _GLIBCXX_END_NAMESPACE_CONTAINER
       return __first;
     }
 
+
+
+#ifdef __cpp_lib_hardware_interference_size
+
+template<typename _Tp>
+struct less;
+
+template<typename _Tp>
+struct greater;
+
+template<typename _ForwardIterator, typename _Tp, typename _Compare> 
+  _GLIBCXX20_CONSTEXPR
+  typename std::enable_if<std::is_arithmetic<_Tp>::value && (
+#if __cplusplus >= 201402L
+           std::is_same<_Compare, std::greater<void>>::value || 
+           std::is_same<_Compare, std::less<void>>::value ||
+#endif
+           std::is_same<_Compare, std::greater<_Tp>>::value ||
+           std::is_same<_Compare, std::less<_Tp>>::value), _ForwardIterator>::type 
+  __lower_bound(_ForwardIterator __first, _ForwardIterator __last,
+		           const _Tp& __val, _Compare __comp)
+  {
+    _GLIBCXX20_CONSTEXPR size_t __binsearch_distance = std::hardware_constructive_interference_size / sizeof(_Tp);
+    typedef typename std::iterator_traits<_ForwardIterator>::difference_type _DistanceType;
+    _DistanceType __len = std::distance(__first, __last);
+    while (__len > __binsearch_distance)
+    {
+      _DistanceType __half = __len >> 1;
+      _ForwardIterator __middle = __first;
+      std::advance(__middle, __half);
+      if (__comp(*__middle, __val))
+      {
+        __first = __middle;
+        ++__first;
+        __len = __len - __half - 1;
+      } else
+        __len = __half;
+    }
+    for (auto i = __first ; i != __last ; ++i) {
+        if (!__comp(*i, __val)) {
+            return i;
+        }
+    }
+    return __last;
+  }
+#endif
+
   /**
    *  @brief Finds the first position in which @a val could be inserted
    *         without changing the ordering.
