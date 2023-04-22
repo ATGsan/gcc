@@ -1786,6 +1786,18 @@ namespace ranges
 			     __detail::__make_comp_proj(__comp, __proj));
 	return __lasti;
       }
+	  
+    template<random_access_iterator _Iter, sentinel_for<_Iter> _Sent,
+	     typename _Comp = ranges::less, typename _Proj = identity>
+      requires sortable<_Iter, _Comp, _Proj> && std::is_same<_Proj, bool>
+      constexpr _Iter
+      operator()(_Iter __first, _Sent __last,
+		 _Comp __comp = {}, _Proj __proj = {}) const
+      {
+	auto __lasti = ranges::next(__first, __last);
+	partition(__first, __last, __detail::__make_comp_proj(__comp, __proj))
+	return __lasti;
+      }
 
     template<random_access_range _Range,
 	     typename _Comp = ranges::less, typename _Proj = identity>
