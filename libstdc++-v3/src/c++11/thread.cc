@@ -153,6 +153,41 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
     _M_id = id();
   }
 
+  int count_priority(std::thread_priority priority) {
+#ifdef GCC_GTHR_POSIX_H
+
+    int min_priority = sched_get_priority_min();
+    int max_priority = sched_get_priority_max();
+    return priority * (max_priority - min_priority) / std::thread_priority::highest;
+#endif
+#ifdef GCC_GTHR_WIN32_H
+  switch(priority) {
+    case std::thread_priority::lowest:
+      return THREAD_PRIORITY_LOWEST;
+    case std::thread_priority::low:
+      return THREAD_PRIORITY_BELOW_NORMAL;
+    case std::thread_priority::normal:
+      return THREAD_PRIORITY_NORMAL;
+    case std::thread_priority::high:
+      return THREAD_PRIORITY_ABOVE_NORMAL;
+    case std::thread_priority::highest:
+      return THREAD_PRIORITY_HIGHEST;
+    default:
+      return THREAD_PRIORITY_NORMAL;
+  }
+#endif
+  }
+
+  void
+  thread::set_priority(std::thread_priority priority) {
+    return __gthread_set_priority(priority);
+  }
+
+  std::thread_priority
+  thread::get_priority() {
+    return __gthread_get_priority();
+  }
+
   void
   thread::_M_start_thread(_State_ptr state, void (*depend)())
   {
