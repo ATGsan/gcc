@@ -242,6 +242,30 @@ _GLIBCXX_BEGIN_NAMESPACE_CONTAINER
       _GLIBCXX14_CONSTEXPR unsigned long long
       _M_do_to_ullong() const;
 #endif
+#if __cplusplus >= 201103L
+      template<typename _T>
+      _GLIBCXX14_CONSTEXPR _T
+      _M_do_to_integer() const {
+        static_assert(std::is_integral<_T>::value && N <= sizeof(_T) * __CHAR_BIT__);
+        size_t size_in_words = sizeof(_T) / __SIZEOF_LONG__;
+        size_t left_in_bytes = sizeof(_T) % __SIZEOF_LONG__;
+        if (std::numeric_limits<_T>::max() <= _M_w[size_in_words]) {
+          __throw_overflow_error(__N("_Base_bitset::_M_do_to_integer"));
+          return;
+        }
+        for (size_t __i = size_in_words + (left_in_bytes != 0) ; __i < _Nw ; ++__i) {
+            if (words[__i]) {
+                __throw_overflow_error(__N("_Base_bitset::_M_do_to_integer"));
+               return;
+            }
+        }
+        _T ret = 0;
+        for(size_t __i = 0 ; __i < size_in_words + (left_in_bytes != 0) ; ++__i) {
+            ret += static_cast<_T>(_Nw[__i]) << (__CHAR_BIT__ * __i);
+        }
+        return ret;
+      }
+#endif
 
       // find first "on" bit
       _GLIBCXX14_CONSTEXPR size_t
@@ -1269,6 +1293,13 @@ _GLIBCXX_BEGIN_NAMESPACE_CONTAINER
       unsigned long long
       to_ullong() const
       { return this->_M_do_to_ullong(); }
+#endif
+#if __cplusplus >= 201103L
+      template <typename _T>
+      _GLIBCXX23_CONSTEXPR
+      _T
+      to_integer() const
+      { return this->_M_do_to_integer<_T>(); }
 #endif
 
 #if _GLIBCXX_HOSTED
